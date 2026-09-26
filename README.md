@@ -1,2 +1,47 @@
 # clinic-queue-java
 Java project for an electronic clinic queue: JavaFX GUI, CSV import/export, OOP model and error handling.
+# Clinic Queue Java
+
+Учебный проект на Java для работы с электронной очередью поликлиники.
+Проект выполнен в рамках лабораторной работы.
+
+## Возможности
+- отображение талонов в JavaFX;
+- добавление обычных талонов и талонов на дом;
+- редактирование доступных типов талонов;
+- запрет редактирования закрытых талонов;
+- загрузка данных из CSV;
+- сохранение данных в CSV;
+- обработка некорректных строк CSV.
+
+## Типы талонов
+
+- `REGULAR` — обычный талон;
+- `HOME` — талон на дом с адресом;
+- `CLOSED` — закрытый талон, доступный только для просмотра.
+
+## Технологии
+
+- Java 25
+- JavaFX 25
+- Gradle
+- CSV
+
+## Демонстрация работы
+
+### Главное окно
+
+![Main window](docs/main-window.png)
+
+### Добавление талона
+
+![Add ticket](docs/add-ticket.png)
+
+### Загрузка из CSV
+
+![CSV errors](docs/csv-errors.png)
+
+## Запуск
+
+```bash
+./gradlew run
