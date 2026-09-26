@@ -1,5 +1,3 @@
-# clinic-queue-java
-Java project for an electronic clinic queue: JavaFX GUI, CSV import/export, OOP model and error handling.
 # Clinic Queue Java
 
 Учебный проект на Java для работы с электронной очередью поликлиники.
