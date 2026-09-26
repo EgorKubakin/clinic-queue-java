@@ -29,15 +29,15 @@
 
 ### Главное окно
 
-![Main window](docs/main-window.png)
+![Main window](docs/main.png)
 
 ### Добавление талона
 
-![Add ticket](docs/add-ticket.png)
+![Add ticket](docs/AddTicket.png)
 
 ### Загрузка из CSV
 
-![CSV errors](docs/csv-errors.png)
+![CSV errors](docs/load.png)
 
 ## Запуск
 
