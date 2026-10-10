@@ -1,8 +1,8 @@
-package lab1.tickets;
+package lab2.tickets;
 
 import java.time.LocalTime;
 
-public class HomeTicket extends Ticket implements Editable{
+public class HomeTicket extends Ticket implements Editable {
     private String adres;
 
     public String getAdres() {
@@ -14,7 +14,7 @@ public class HomeTicket extends Ticket implements Editable{
     }
 
     public HomeTicket(int cardNumber, int office, String name, int priority, LocalTime time, String adres) {
-        super( cardNumber,office, name,priority,time);
-        this.adres=adres;
+        super(cardNumber, office, name, priority, time);
+        this.adres = adres;
     }
 }

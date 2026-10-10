@@ -1,37 +1,71 @@
-package lab1.io;
+package lab2.io;
 
-import lab1.exception.CsvException;
-import lab1.tickets.Ticket;
-import lab1.tickets.TicketType;
+import lab2.exception.CsvException;
+import lab2.heap.BinHeap;
+import lab2.tickets.Ticket;
+import lab2.tickets.TicketType;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 public class CsvLoader {
-    public static CsvLoadResult load(Path path) throws IOException {
-        List<Ticket> tickets = new ArrayList<>();
-        ArrayList<CsvException> errors = new ArrayList<>();
-        CsvLoadResult res = new CsvLoadResult(tickets, errors);
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            String str;
-            int linenumber = 0;
-            while ((str = bufferedReader.readLine()) != null) {
-                try {
-                    linenumber++;
-                    Ticket ticket = parseLine(str, linenumber);
-                    res.addticket(ticket);
-                } catch (CsvException e) {
-                    res.adderr(e);
+    public static CsvLoadResult load(Path path, Path errorLogPath) throws IOException {
+        return load(path, errorLogPath, null);
+    }
+
+    public static CsvLoadResult load(Path path, Path errorLogPath, ProgressListener progress) throws IOException {
+        long totalLines;
+        try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
+            totalLines = lines.count();
+        }
+        BinHeap<Ticket> tickets = new BinHeap<>((ticket1, ticket2) -> {
+            int res = Integer.compare(ticket1.getPriority(), ticket2.getPriority());
+            if (res == 0) {
+                res = ticket1.getTime().compareTo(ticket2.getTime());
+            }
+            return res;
+        });
+        int errorCount = 0;
+        try (BufferedWriter writer = Files.newBufferedWriter(errorLogPath, StandardCharsets.UTF_8)) {
+            try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+                String str;
+                int linenumber = 0;
+                if (progress != null) {
+                    progress.update(linenumber, totalLines);
                 }
+                while ((str = bufferedReader.readLine()) != null) {
+                    linenumber++;
+                    if (progress != null) {
+                        if (progress.update(linenumber, totalLines)) {
+                            break;
+                        }
+                        ;
+                    }
+                    try {
+                        Ticket ticket = parseLine(str, linenumber);
+                        if (ticket != null) {
+                            tickets.add(ticket);
+                        }
+                    } catch (CsvException e) {
+                        errorCount++;
+                        writer.write("Line " + e.getLineNumber() + " -> " + e.getCode() + " : " + e.getMessage());
+                        writer.newLine();
+                    }
+                }
+
             }
         }
-        return res;
+        tickets.clearTrace();
+        return new CsvLoadResult(tickets, errorCount);
     }
 
     private static Ticket parseLine(String line, int linenumber) throws CsvException {
@@ -45,14 +79,14 @@ public class CsvLoader {
         } catch (IllegalArgumentException e) {
             throw new CsvException("unknown type", CsvException.CsvErrorCode.UNKNOWN_TYPE, linenumber);
         }
-        CsvTicketHandler handler=null;
+        CsvTicketHandler handler = null;
         for (CsvTicketHandler tp : CsvTicketHandler.values()) {
-            if (type==tp.getType()) {
+            if (type == tp.getType()) {
                 handler = tp;
                 break;
             }
         }
-        if (handler==null) {
+        if (handler == null) {
             throw new CsvException("unknown type", CsvException.CsvErrorCode.UNKNOWN_TYPE, linenumber);
         } else if (args.length != handler.getLen()) {
             throw new CsvException("incorrect field count ", CsvException.CsvErrorCode.WRONG_FIELD_COUNT, linenumber);
