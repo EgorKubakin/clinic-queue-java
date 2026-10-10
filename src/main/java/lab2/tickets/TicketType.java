@@ -1,4 +1,4 @@
-package lab1.tickets;
+package lab2.tickets;
 
 public enum TicketType {
     REGULAR,

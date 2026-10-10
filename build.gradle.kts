@@ -19,5 +19,5 @@ javafx {
 }
 
 application {
-    mainClass = "lab1.Main"
+    mainClass = "lab2.Main"
 }
