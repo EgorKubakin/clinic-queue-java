@@ -42,6 +42,7 @@ public class MainGui extends Application {
     private static final int MAX_TABLE_ITEMS = 1000;
     private int countUrgent = 0;
     private boolean heapWriteLocked = false;
+    private int activeSaves = 0;
 
     private static class TicketForm {
         final Dialog<ButtonType> dialog = new Dialog<>();
@@ -170,13 +171,13 @@ public class MainGui extends Application {
             handleChangeP(table, array, canvas);
         });
         loadcsv.setOnAction(event -> {
-            handleLoadCsv(stage, array, canvas, progressBar, percentProgress, cancel, loadcsv, generate, merge);
+            handleLoadCsv(stage, array, canvas, progressBar, percentProgress, cancel, loadcsv, generate, merge, add, editable, delete, nextTicket, changeP, table);
         });
         savecsv.setOnAction(event -> {
             handleSaveCsv(stage, editable, changeP, table);
         });
         generate.setOnAction(e -> {
-            handleGenerateTask(generateText, progressBar, percentProgress, array, canvas, cancel, generate, loadcsv, merge);
+            handleGenerateTask(generateText, progressBar, percentProgress, array, canvas, cancel, generate, loadcsv, merge, add, editable, delete, nextTicket, changeP, table);
         });
         getU.setOnAction(event -> {
             handleUrgent(mostK);
@@ -465,7 +466,7 @@ public class MainGui extends Application {
                 binHeap.updatePosition(index);
                 refreshView(array, canvas);
             }
-        } catch (IllegalArgumentException | DateTimeParseException e) {
+        } catch (IllegalArgumentException | DateTimeParseException | NoSuchElementException e) {
             Alert alert = errAlert("Incorrect argument", null, e.getMessage());
             alert.showAndWait();
         }
@@ -493,12 +494,10 @@ public class MainGui extends Application {
         }
     }
 
-    private void handleGenerateTask(TextField generateText, ProgressBar progressBar, Label percentProgress, ObservableList<Ticket> array, HeapVisualizer canvas, Button cancel, Button generateButton, Button load, Button merge) {
+    private void handleGenerateTask(TextField generateText, ProgressBar progressBar, Label percentProgress, ObservableList<Ticket> array, HeapVisualizer canvas, Button cancel, Button generateButton, Button load, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table) {
         try {
 
-            setButtonDisable(generateButton, true, cancel, false);
-            load.setDisable(true);
-            merge.setDisable(true);
+            setMergeControls(true, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             int count = Integer.parseInt(generateText.getText());
             TicketGeneratorTask ticketGeneratorTask = new TicketGeneratorTask(new TicketGenerator(), createHeap(), count);
             Thread thread = new Thread(ticketGeneratorTask);
@@ -511,18 +510,14 @@ public class MainGui extends Application {
                 alert.setHeaderText("Generation tickets");
                 alert.setContentText("Generated Canceled");
                 alert.show();
-                setButtonDisable(generateButton, false, cancel, true);
-                load.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             });
             ticketGeneratorTask.setOnFailed((event) -> {
                 unBind(progressBar, percentProgress, "failed", 0f);
                 Throwable exception = ticketGeneratorTask.getException();
                 Alert alert = errAlert(exception.getClass().toString(), null, exception.getMessage());
                 alert.showAndWait();
-                setButtonDisable(generateButton, false, cancel, true);
-                load.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             });
             ticketGeneratorTask.setOnSucceeded((event) -> {
                 unBind(progressBar, percentProgress, "100%", 1);
@@ -534,9 +529,7 @@ public class MainGui extends Application {
                 double ms = ticketGeneratorTask.getMs();
                 alert.setContentText("Generated tickets: " + count + "\nIn " + String.format("%.2f", ms) + " milliseconds");
                 alert.show();
-                setButtonDisable(generateButton, false, cancel, true);
-                load.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             });
 
             cancel.setOnAction((event) -> {
@@ -545,9 +538,7 @@ public class MainGui extends Application {
             thread.setDaemon(true);
             thread.start();
         } catch (IllegalArgumentException | IOException ex) {
-            setButtonDisable(generateButton, false, cancel, true);
-            load.setDisable(false);
-            merge.setDisable(false);
+            setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             Alert alert = errAlert(ex.getClass().toString(), null, ex.getMessage());
             alert.showAndWait();
         }
@@ -558,16 +549,13 @@ public class MainGui extends Application {
         cancel.setDisable(two);
     }
 
-    private void handleLoadCsv(Stage stage, ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge) {
+    private void handleLoadCsv(Stage stage, ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose CSV");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Csv Files", "*.csv"));
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            cancel.setDisable(false);
-            loadCsv.setDisable(true);
-            generate.setDisable(true);
-            merge.setDisable(true);
+            setMergeControls(true, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             Task<CsvLoadResult> load = new Task<>() {
                 @Override
                 protected CsvLoadResult call() throws Exception {
@@ -596,10 +584,7 @@ public class MainGui extends Application {
                 } else {
                     alert.setContentText("Errors: " + res.getErrorCount() + "\nError log saved to:\n" + getErrorLogPath(file.toPath()));
                 }
-                cancel.setDisable(true);
-                loadCsv.setDisable(false);
-                generate.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
                 alert.show();
             });
             load.setOnCancelled((e) -> {
@@ -608,20 +593,14 @@ public class MainGui extends Application {
                 alert.setTitle("Canceled");
                 alert.setHeaderText("Load tickets");
                 alert.setContentText("Loading Canceled");
-                cancel.setDisable(true);
-                loadCsv.setDisable(false);
-                generate.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
                 alert.show();
             });
             load.setOnFailed(e -> {
                 unBind(progressBar, percentProgress, "failed", 0f);
                 Throwable exception = load.getException();
                 Alert alert = errAlert("Error IO", null, exception.getMessage());
-                cancel.setDisable(true);
-                loadCsv.setDisable(false);
-                generate.setDisable(false);
-                merge.setDisable(false);
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
                 alert.showAndWait();
             });
             cancel.setOnAction((event) -> {
@@ -646,6 +625,7 @@ public class MainGui extends Application {
         fileChooser.setTitle("Save CSV");
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
+            activeSaves++;
             edit.setDisable(true);
             changeP.setDisable(true);
             BinHeap<Ticket> snapshot = binHeap.copy();
@@ -662,12 +642,18 @@ public class MainGui extends Application {
                 alert.setHeaderText(null);
                 alert.setContentText("File save successfully");
                 alert.show();
+                activeSaves--;
                 restoreEditButtons(table, edit, changeP);
             });
             save.setOnFailed((ev) -> {
                 Throwable e = save.getException();
                 Alert al = errAlert(e.getClass().toString(), null, e.getMessage());
                 al.showAndWait();
+                activeSaves--;
+                restoreEditButtons(table, edit, changeP);
+            });
+            save.setOnCancelled(e -> {
+                activeSaves--;
                 restoreEditButtons(table, edit, changeP);
             });
             Thread thread = new Thread(save);
@@ -679,7 +665,7 @@ public class MainGui extends Application {
     private void restoreEditButtons(TableView<Ticket> table, Button edit, Button changeP) {
         Ticket selectedTicket = table.getSelectionModel().getSelectedItem();
 
-        if (selectedTicket instanceof Editable) {
+        if (selectedTicket instanceof Editable && !heapWriteLocked && activeSaves == 0) {
             edit.setDisable(false);
             changeP.setDisable(false);
         } else {
@@ -714,13 +700,7 @@ public class MainGui extends Application {
                 delete.setDisable(true);
             }
 
-            if (newTicket instanceof Editable) {
-                editable.setDisable(false);
-                changeP.setDisable(false);
-            } else {
-                editable.setDisable(true);
-                changeP.setDisable(true);
-            }
+            restoreEditButtons(table, editable, changeP);
         });
     }
 
@@ -769,8 +749,7 @@ public class MainGui extends Application {
             nextTicket.setDisable(binHeap == null || binHeap.getSize() == 0);
             Ticket selected = table.getSelectionModel().getSelectedItem();
             delete.setDisable(selected == null);
-            editable.setDisable(!(selected instanceof Editable));
-            changeP.setDisable(!(selected instanceof Editable));
+            restoreEditButtons(table, editable, changeP);
         }
     }
 
