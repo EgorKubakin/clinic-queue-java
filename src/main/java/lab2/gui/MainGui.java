@@ -1,8 +1,5 @@
 package lab2.gui;
-
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -20,30 +17,42 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lab2.exception.SerialException;
 import lab2.generator.TicketGenerator;
 import lab2.generator.TicketGeneratorTask;
 import lab2.heap.BinHeap;
 import lab2.io.CsvLoadResult;
 import lab2.io.CsvLoader;
 import lab2.io.CsvSaver;
+import lab2.io.serializable.BinSerializable;
+import lab2.io.serializable.JsonSerializer;
+import lab2.io.serializable.Serializer;
 import lab2.tickets.*;
 import javafx.scene.control.ScrollPane;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class MainGui extends Application {
     private BinHeap<Ticket> binHeap;
     private static final int MAX_TABLE_ITEMS = 1000;
+    private static final int MAX_TICKETS = 20000000;
     private int countUrgent = 0;
     private boolean heapWriteLocked = false;
     private int activeSaves = 0;
-
+    private Comparator<Ticket> comparator= (ticket1, ticket2) -> {
+        int res = Integer.compare(ticket1.getPriority(), ticket2.getPriority());
+        if (res == 0) {
+            res = ticket1.getTime().compareTo(ticket2.getTime());
+        }
+        return res;
+    };
+    private static final int SCHEMA_VERSION = 1;
     private static class TicketForm {
         final Dialog<ButtonType> dialog = new Dialog<>();
         final ComboBox<TicketType> comboType = new ComboBox<>();
@@ -60,54 +69,7 @@ public class MainGui extends Application {
         binHeap = createHeap();
         BorderPane borderPane = new BorderPane();
         TableView<Ticket> table = new TableView<>();
-        TableColumn<Ticket, Integer> colCard = new TableColumn<>("Card Number");
-        TableColumn<Ticket, String> type = new TableColumn<>("Type");
-        TableColumn<Ticket, String> adres = new TableColumn<>("Address");
-        TableColumn<Ticket, String> colName = new TableColumn<>("Name");
-        TableColumn<Ticket, Integer> office = new TableColumn<>("Office");
-        TableColumn<Ticket, Integer> priority = new TableColumn<>("Priority");
-        TableColumn<Ticket, LocalTime> time = new TableColumn<>("time");
-        colCard.setCellValueFactory((cellData) -> {
-            Ticket val = cellData.getValue();
-            return new ReadOnlyObjectWrapper<>(val.getCardNumber());
-        });
-        colName.setCellValueFactory((cellData) -> {
-            Ticket val = cellData.getValue();
-            return new ReadOnlyStringWrapper(val.getName());
-        });
-        office.setCellValueFactory((cellData) -> {
-            Ticket val = cellData.getValue();
-            return new ReadOnlyObjectWrapper<>(val.getOffice());
-        });
-        priority.setCellValueFactory((cellData) -> {
-            Ticket val = cellData.getValue();
-            return new ReadOnlyObjectWrapper<>(val.getPriority());
-        });
-        time.setCellValueFactory((cellData) -> {
-            Ticket val = cellData.getValue();
-            return new ReadOnlyObjectWrapper<>(val.getTime());
-        });
-        type.setCellValueFactory(cellData -> {
-            Ticket val = cellData.getValue();
-            if (val instanceof RegularTicket) {
-                return new ReadOnlyStringWrapper(TicketType.REGULAR.name());
-            } else if (val instanceof CloseTicket) {
-                return new ReadOnlyStringWrapper(TicketType.CLOSED.name());
-            } else if (val instanceof HomeTicket) {
-                return new ReadOnlyStringWrapper(TicketType.HOME.name());
-            }
-            return new ReadOnlyStringWrapper("NONE");
-        });
-        adres.setCellValueFactory(cellData -> {
-            Ticket tk = cellData.getValue();
-            if (tk instanceof HomeTicket) {
-                return new ReadOnlyStringWrapper(((HomeTicket) tk).getAdres());
-            }
-            return new ReadOnlyStringWrapper("");
-        });
-        colName.setMinWidth(180);
-        adres.setMinWidth(180);
-        table.getColumns().addAll(type, colCard, colName, office, priority, time, adres);
+        TicketTableConfig.config(table);
         ObservableList<Ticket> array = FXCollections.observableArrayList();
         table.setItems(array);
         HeapVisualizer canvas = new HeapVisualizer();
@@ -124,8 +86,8 @@ public class MainGui extends Application {
         HBox hBox2 = new HBox(30);
         HBox hBox3 = new HBox(40);
         VBox vBox = new VBox(20);
-        Button loadcsv = new Button("Load CSV");
-        Button savecsv = new Button("Save CSV");
+        Button loadcsv = new Button("Load");
+        Button savecsv = new Button("Save");
         Button add = new Button("add");
         Button editable = new Button("Edit");
         Button delete = new Button("Delete");
@@ -171,10 +133,10 @@ public class MainGui extends Application {
             handleChangeP(table, array, canvas);
         });
         loadcsv.setOnAction(event -> {
-            handleLoadCsv(stage, array, canvas, progressBar, percentProgress, cancel, loadcsv, generate, merge, add, editable, delete, nextTicket, changeP, table);
+            handleLoad(stage, array, canvas, progressBar, percentProgress, cancel, loadcsv, generate, merge, add, editable, delete, nextTicket, changeP, table);
         });
         savecsv.setOnAction(event -> {
-            handleSaveCsv(stage, editable, changeP, table);
+            handleSave(stage, editable, changeP, table);
         });
         generate.setOnAction(e -> {
             handleGenerateTask(generateText, progressBar, percentProgress, array, canvas, cancel, generate, loadcsv, merge, add, editable, delete, nextTicket, changeP, table);
@@ -220,8 +182,6 @@ public class MainGui extends Application {
                 Alert alert = infoAlertTicket("Search result", null, binHeap.get(lastindex), "Search Ticket: ");
                 alert.showAndWait();
             }
-
-
         } catch (NumberFormatException e) {
             Alert alert = errAlert("Error", e.getClass().toString(), e.getMessage());
             alert.showAndWait();
@@ -277,7 +237,7 @@ public class MainGui extends Application {
             refreshView(array, canvas);
             alert.showAndWait();
         } catch (NoSuchElementException e) {
-            Alert alert = errAlert("Heap is null", null, e.getMessage());
+            Alert alert = errAlert("Heap is empty", null, e.getMessage());
             alert.showAndWait();
         }
     }
@@ -328,13 +288,11 @@ public class MainGui extends Application {
                 if (countUrgent < num - 1) {
                     countUrgent++;
                 }
-
                 back.setDisable(countUrgent == 0);
                 next.setDisable(countUrgent == num - 1);
 
                 ticketInfo.setText(getStringTicketInfo(tickets[countUrgent]));
             });
-
             back.setOnAction(e -> {
                 if (countUrgent > 0) {
                     countUrgent--;
@@ -462,7 +420,6 @@ public class MainGui extends Application {
                         ticket instanceof HomeTicket newHome) {
                     oldHome.setAdres(newHome.getAdres());
                 }
-
                 binHeap.updatePosition(index);
                 refreshView(array, canvas);
             }
@@ -471,34 +428,13 @@ public class MainGui extends Application {
             alert.showAndWait();
         }
     }
-
-    private void handleGenerate(TextField generate, ObservableList<Ticket> array, HeapVisualizer canvas, Button cancel, Button generateButton) {
-        try {
-            setButtonDisable(generateButton, true, cancel, false);
-            int count = Integer.parseInt(generate.getText().trim());
-            BinHeap<Ticket> ticketBinHeap = createHeap();
-            TicketGenerator ticketGenerator = new TicketGenerator();
-            ticketGenerator.generate(ticketBinHeap, count);
-            binHeap = ticketBinHeap;
-            refreshView(array, canvas);
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Generation");
-            alert.setHeaderText("Generation tickets");
-            double ms = ticketGenerator.getMs();
-            alert.setContentText("Generated tickets: " + count + "\nIn " + String.format("%.2f", ms) + " milliseconds");
-            alert.showAndWait();
-            setButtonDisable(generateButton, false, cancel, true);
-        } catch (IllegalArgumentException | IOException e) {
-            Alert alert = errAlert(e.getClass().toString(), null, e.getMessage());
-            alert.showAndWait();
-        }
-    }
-
     private void handleGenerateTask(TextField generateText, ProgressBar progressBar, Label percentProgress, ObservableList<Ticket> array, HeapVisualizer canvas, Button cancel, Button generateButton, Button load, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table) {
         try {
-
             setMergeControls(true, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             int count = Integer.parseInt(generateText.getText());
+            if(count>MAX_TICKETS||count<=0){
+                throw new IllegalArgumentException("Incorrect value");
+            }
             TicketGeneratorTask ticketGeneratorTask = new TicketGeneratorTask(new TicketGenerator(), createHeap(), count);
             Thread thread = new Thread(ticketGeneratorTask);
             progressBar.progressProperty().bind(ticketGeneratorTask.progressProperty());
@@ -531,13 +467,12 @@ public class MainGui extends Application {
                 alert.show();
                 setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             });
-
             cancel.setOnAction((event) -> {
                 ticketGeneratorTask.cancel();
             });
             thread.setDaemon(true);
             thread.start();
-        } catch (IllegalArgumentException | IOException ex) {
+        } catch (IllegalArgumentException | IOException ex ) {
             setMergeControls(false, load, generateButton, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             Alert alert = errAlert(ex.getClass().toString(), null, ex.getMessage());
             alert.showAndWait();
@@ -548,12 +483,7 @@ public class MainGui extends Application {
         generateButton.setDisable(one);
         cancel.setDisable(two);
     }
-
-    private void handleLoadCsv(Stage stage, ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose CSV");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Csv Files", "*.csv"));
-        File file = fileChooser.showOpenDialog(stage);
+    private void loadCsv(File file, ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table){
         if (file != null) {
             setMergeControls(true, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
             Task<CsvLoadResult> load = new Task<>() {
@@ -610,6 +540,100 @@ public class MainGui extends Application {
             thread.start();
         }
     }
+    private void loadSerialize(String extension,File file,ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table){
+        try {
+            Serializer serializer = switch (extension) {
+                case "json" -> new JsonSerializer();
+                case "bin" -> new BinSerializable();
+                default -> throw new IllegalArgumentException("File extension is incorrect");
+            };
+            setMergeControls(true, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+            Task<BinHeap<Ticket>> load = new Task<>() {
+                @Override
+                protected BinHeap<Ticket> call() throws Exception {
+
+                    BinHeap<Ticket> res = serializer.load(file.toPath(),comparator,SCHEMA_VERSION);
+                    return res;
+                }
+            };
+            progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+            percentProgress.setText("In processing..");
+            Thread thread = new Thread(load);
+            load.setOnSucceeded(e -> {
+                progressBar.setProgress(1);
+                percentProgress.setText("100%");
+                binHeap = load.getValue();
+                binHeap.clearTrace();
+                refreshView(array, canvas);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Load information");
+                alert.setHeaderText("Table is successful loaded");
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                alert.show();
+            });
+            load.setOnCancelled((e) -> {
+                progressBar.setProgress(0);
+                percentProgress.setText("Canceled");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Canceled");
+                alert.setHeaderText("Load tickets");
+                alert.setContentText("Loading Canceled");
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                alert.show();
+            });
+            load.setOnFailed(e -> {
+                progressBar.setProgress(0);
+                percentProgress.setText("Failed");
+                Throwable ex = load.getException();
+                Alert alert;
+                if(ex instanceof SerialException exception){
+                     alert = errAlert("Loading error", exception.getCode().toString(), exception.getShortMessage());
+                }else {
+                    alert = errAlert("Loading error",null,ex.getMessage());
+                }
+                setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                alert.showAndWait();
+            });
+            cancel.setOnAction((event) -> {
+                load.cancel();
+            });
+            thread.setDaemon(true);
+            thread.start();
+
+        }catch (IllegalArgumentException e){
+            Alert alert = errAlert(e.getClass().toString(),null,e.getMessage());
+            alert.showAndWait();
+        }
+
+    }
+    private void handleLoad(Stage stage,ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Files", "*.csv","*.json","*.bin"));
+        File file = fileChooser.showOpenDialog(stage);
+        try {
+            if(file == null){
+                return;
+            }
+            Path path = file.toPath();
+            String filename= String.valueOf(path.getFileName()).toLowerCase();
+            int index = filename.lastIndexOf(".");
+
+            if (index > 0) {
+                String extension = filename.substring(index + 1);
+                switch (extension){
+                    case "csv"->loadCsv(file,array,canvas,progressBar,percentProgress,cancel,loadCsv,generate,merge,add,editable,delete,nextTicket,changeP,table);
+                    case "json","bin"->loadSerialize(extension,file,array,canvas,progressBar,percentProgress,cancel,loadCsv,generate,merge,add,editable,delete,nextTicket,changeP,table);
+                    default -> throw new IllegalArgumentException("File extension is incorrect: " + filename);
+                }
+            } else {
+                throw new IllegalArgumentException("File extension is incorrect: "+filename);
+            }
+        } catch (IllegalArgumentException e){
+            Alert alert = errAlert(e.getClass().toString(),null,e.getMessage());
+            alert.showAndWait();
+        }
+    }
 
     private Path getErrorLogPath(Path csvPath) {
         String fileName = csvPath.getFileName().toString();
@@ -619,41 +643,91 @@ public class MainGui extends Application {
         }
         return csvPath.resolveSibling(fileName + "_errors.txt");
     }
+    private void handleSave(Stage stage, Button edit, Button changeP, TableView<Ticket> table){
+        if (activeSaves > 0) {
+            return;
+        }
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Save format");
+        dialog.setHeaderText("Choose format");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.getItems().addAll("CSV","JSON","BIN");
+        comboBox.getSelectionModel().selectFirst();
+        Button buttonSave = new Button("Save");
+        HBox hBox = new HBox(20);
+        hBox.getChildren().add(comboBox);
+        hBox.getChildren().add(buttonSave);
+        dialog.getDialogPane().setContent(hBox);
+        ButtonType exitType = new ButtonType("Exit", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(exitType);
+        buttonSave.setOnAction((event)->{
+            String format = comboBox.getValue().toLowerCase();
+            handleSaver(format,stage,edit,changeP,table,dialog,buttonSave);
+        });
+        dialog.show();
+    }
 
-    private void handleSaveCsv(Stage stage, Button edit, Button changeP, TableView<Ticket> table) {
+    private void handleSaver(String format,Stage stage, Button edit, Button changeP, TableView<Ticket> table,Dialog<Void> dialog,Button saveButton) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save CSV");
+        fileChooser.setTitle("Save "+format);
+        fileChooser.setInitialFileName("tickets."+format);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(format.toUpperCase()+" files", "*."+format));
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
+            if (!file.getName().toLowerCase().endsWith("."+format)) {
+                file = new File(file.getAbsolutePath() + "."+format);
+            }
+            Path path =file.toPath();
             activeSaves++;
             edit.setDisable(true);
             changeP.setDisable(true);
+            saveButton.setDisable(true);
             BinHeap<Ticket> snapshot = binHeap.copy();
             Task<Void> save = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
-                    CsvSaver.save(snapshot, file.toPath());
+                    if (format.equals("csv")) {
+                        CsvSaver.save(snapshot, path);
+                    }else {
+                        Serializer serializer = switch (format){
+                            case "json"->new JsonSerializer();
+                            case "bin"-> new BinSerializable();
+                            default -> throw new IllegalArgumentException("Incorrect value format");
+                        };
+                        serializer.save(path,snapshot,SCHEMA_VERSION);
+                    }
                     return null;
                 }
             };
             save.setOnSucceeded((e) -> {
+                dialog.close();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Save successfully");
                 alert.setHeaderText(null);
                 alert.setContentText("File save successfully");
                 alert.show();
                 activeSaves--;
+                saveButton.setDisable(false);
                 restoreEditButtons(table, edit, changeP);
             });
             save.setOnFailed((ev) -> {
+                dialog.close();
                 Throwable e = save.getException();
-                Alert al = errAlert(e.getClass().toString(), null, e.getMessage());
+                Alert al;
+                if(e instanceof SerialException ex){
+                    al = errAlert(ex.getCode().toString(),null,ex.getShortMessage());
+                }else {
+                   al= errAlert(e.getClass().toString(), null, e.getMessage());
+                }
                 al.showAndWait();
                 activeSaves--;
+                saveButton.setDisable(false);
                 restoreEditButtons(table, edit, changeP);
             });
             save.setOnCancelled(e -> {
+                dialog.close();
                 activeSaves--;
+                saveButton.setDisable(false);
                 restoreEditButtons(table, edit, changeP);
             });
             Thread thread = new Thread(save);
@@ -699,7 +773,6 @@ public class MainGui extends Application {
             } else {
                 delete.setDisable(true);
             }
-
             restoreEditButtons(table, editable, changeP);
         });
     }
@@ -746,7 +819,7 @@ public class MainGui extends Application {
             merge.setDisable(false);
             add.setDisable(false);
             cancel.setDisable(true);
-            nextTicket.setDisable(binHeap == null || binHeap.getSize() == 0);
+            nextTicket.setDisable(false);
             Ticket selected = table.getSelectionModel().getSelectedItem();
             delete.setDisable(selected == null);
             restoreEditButtons(table, editable, changeP);
@@ -760,7 +833,6 @@ public class MainGui extends Application {
         }
         return info;
     }
-
     private TicketForm editdialog(String title) {
         TicketForm form = new TicketForm();
         GridPane grid = new GridPane();
@@ -802,15 +874,8 @@ public class MainGui extends Application {
     }
 
     private BinHeap<Ticket> createHeap() {
-        return new BinHeap<>((ticket1, ticket2) -> {
-            int res = Integer.compare(ticket1.getPriority(), ticket2.getPriority());
-            if (res == 0) {
-                res = ticket1.getTime().compareTo(ticket2.getTime());
-            }
-            return res;
-        });
+        return new BinHeap<>(comparator);
     }
-
     private Ticket applyTicketForm(TicketForm form) {
         TicketType typed = form.comboType.getValue();
         int cardNumber = Integer.parseInt(form.cardNum.getText());
@@ -820,6 +885,9 @@ public class MainGui extends Application {
         LocalTime tme = LocalTime.parse(form.time.getText());
         if (addname.isBlank() || addname.contains(";")) {
             throw new IllegalArgumentException("Incorrect field name");
+        }
+        if(cardNumber<=0||off<0){
+            throw new IllegalArgumentException("Incorrect field value");
         }
         if (typed == TicketType.REGULAR) {
             return new RegularTicket(cardNumber, off, addname, priOrity, tme);
@@ -831,8 +899,4 @@ public class MainGui extends Application {
             return new HomeTicket(cardNumber, off, addname, priOrity, tme, adress);
         }
     }
-
 }
-
-
-

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public class BinHeap<T> {
+
     private Object[] arr;
     private int size;
     private int capacity;
@@ -17,8 +18,6 @@ public class BinHeap<T> {
     public int[] getVisited() {
         return visited;
     }
-
-
     public int getLastIndex() {
         return lastIndex;
     }

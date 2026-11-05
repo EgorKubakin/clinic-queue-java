@@ -100,6 +100,9 @@ public class CsvLoader {
             cardNumber = Integer.parseInt(args[1]);
             office = Integer.parseInt(args[3]);
             name = args[2];
+            if(office<0||cardNumber<=0){
+                throw new CsvException("Incorrect value in Field", CsvException.CsvErrorCode.BAD_NUMBER,linenumber);
+            }
             if (name.isBlank()) {
                 throw new CsvException("Field name is null", CsvException.CsvErrorCode.EMPTY_FIELD, linenumber);
             }

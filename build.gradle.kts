@@ -21,3 +21,22 @@ javafx {
 application {
     mainClass = "lab2.Main"
 }
+
+dependencies {
+    // Jackson: JSON-сериализация и десериализация
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+
+    // Поддержка LocalTime, LocalDateTime и других типов java.time
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.4")
+
+    // JUnit 5
+    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+
+    // Запуск JUnit-тестов через Gradle
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

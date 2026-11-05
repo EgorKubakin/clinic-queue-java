@@ -12,7 +12,7 @@ public class HeapBenchmark {
     public static void main(String[] args) {
 
         test(10_000);
-        test(100_000);
+        test(1000_0000);
     }
 
     private static void test(int size) {

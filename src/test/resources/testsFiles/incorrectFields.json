@@ -1,0 +1,31 @@
+{
+  "version": 20,
+  "tickets": [
+    {
+      "type": "REGULAR",
+      "cardNumber": 1006,
+      "office": 75,
+      "name": "Николай Пестов",
+      "priority": 0,
+      "time": "08:35:00"
+    },
+    {
+      "type": "HOME",
+      "cardNumber": 1074,
+      "office": 94,
+      "name": "",
+      "priority": 0,
+      "time": "08:53:00",
+      "adres": "ул. Спортивная, 215Б"
+    },
+    {
+      "type": "HOME",
+      "cardNumber": 1053,
+      "office": 36,
+      "name": "",
+      "priority": 0,
+      "time": "09:20:00",
+      "adres": "ул. Гвардейская, 104к1"
+    }
+  ]
+}

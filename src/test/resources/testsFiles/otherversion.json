@@ -1,0 +1,736 @@
+{
+  "version" : 20,
+  "tickets" : [ {
+    "type" : "REGULAR",
+    "cardNumber" : 1006,
+    "office" : 75,
+    "name" : "Николай Пестов",
+    "priority" : 0,
+    "time" : "08:35:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1074,
+    "office" : 94,
+    "name" : "Феофан Федоров",
+    "priority" : 0,
+    "time" : "08:53:00",
+    "adres" : "ул. Спортивная, 215Б"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1053,
+    "office" : 36,
+    "name" : "Нинель Петров",
+    "priority" : 0,
+    "time" : "09:20:00",
+    "adres" : "ул. Гвардейская, 104к1"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1069,
+    "office" : 44,
+    "name" : "Серафим Михайлов",
+    "priority" : 0,
+    "time" : "09:06:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1010,
+    "office" : 25,
+    "name" : "Ермолай Белозеров",
+    "priority" : 0,
+    "time" : "13:40:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1011,
+    "office" : 50,
+    "name" : "Пров Маслов",
+    "priority" : 0,
+    "time" : "10:05:00",
+    "adres" : "ул. Есенина, 116"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1059,
+    "office" : 7,
+    "name" : "Пантелеймон Анисимова",
+    "priority" : 0,
+    "time" : "17:36:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1044,
+    "office" : 24,
+    "name" : "Ефим Миронов",
+    "priority" : 0,
+    "time" : "13:18:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1066,
+    "office" : 43,
+    "name" : "Панкрат Дементьев",
+    "priority" : 0,
+    "time" : "11:41:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1080,
+    "office" : 86,
+    "name" : "Аникита Романова",
+    "priority" : 0,
+    "time" : "16:34:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1042,
+    "office" : 51,
+    "name" : "Иларион Соловьев",
+    "priority" : 0,
+    "time" : "15:07:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1004,
+    "office" : 48,
+    "name" : "Ефим Пестова",
+    "priority" : 0,
+    "time" : "14:24:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1050,
+    "office" : 48,
+    "name" : "Антонина Сазонов",
+    "priority" : 0,
+    "time" : "12:54:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1029,
+    "office" : 74,
+    "name" : "Епифан Беляков",
+    "priority" : 1,
+    "time" : "13:14:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1055,
+    "office" : 68,
+    "name" : "Ермолай Гордеев",
+    "priority" : 1,
+    "time" : "11:43:00",
+    "adres" : "бульвар Победы, 7"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1064,
+    "office" : 12,
+    "name" : "Сильвестр Доронина",
+    "priority" : 0,
+    "time" : "14:13:00",
+    "adres" : "ул. Орджоникидзе, 183"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1031,
+    "office" : 61,
+    "name" : "Прокофий Казаков",
+    "priority" : 0,
+    "time" : "14:00:00",
+    "adres" : "Карла Маркса проспект, 88А"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1036,
+    "office" : 18,
+    "name" : "Ким Григорьев",
+    "priority" : 0,
+    "time" : "15:03:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1037,
+    "office" : 20,
+    "name" : "Тит Сазонов",
+    "priority" : 1,
+    "time" : "09:17:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1040,
+    "office" : 36,
+    "name" : "Сидор Юдин",
+    "priority" : 1,
+    "time" : "17:01:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1085,
+    "office" : 8,
+    "name" : "Виталий Блохин",
+    "priority" : 0,
+    "time" : "18:50:00",
+    "adres" : "ул. Федосеева, 169"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1022,
+    "office" : 87,
+    "name" : "Агата Гришина",
+    "priority" : 2,
+    "time" : "11:04:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1094,
+    "office" : 72,
+    "name" : "Остромир Кудряшов",
+    "priority" : 0,
+    "time" : "17:40:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1024,
+    "office" : 20,
+    "name" : "Екатерина Бобров",
+    "priority" : 1,
+    "time" : "16:40:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1049,
+    "office" : 77,
+    "name" : "Милован Виноградова",
+    "priority" : 1,
+    "time" : "13:59:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1052,
+    "office" : 78,
+    "name" : "Гремислав Колобов",
+    "priority" : 0,
+    "time" : "20:04:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1025,
+    "office" : 35,
+    "name" : "Демьян Уварова",
+    "priority" : 0,
+    "time" : "15:07:00",
+    "adres" : "Ленинский проспект, 55А"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1056,
+    "office" : 24,
+    "name" : "Флорентин Рыбаков",
+    "priority" : 2,
+    "time" : "10:44:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1058,
+    "office" : 26,
+    "name" : "Фаина Колесникова",
+    "priority" : 1,
+    "time" : "16:27:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1060,
+    "office" : 18,
+    "name" : "Ярослав Дементьева",
+    "priority" : 2,
+    "time" : "08:03:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1061,
+    "office" : 29,
+    "name" : "Агап Харитонова",
+    "priority" : 3,
+    "time" : "09:04:00",
+    "adres" : "Береговая набережная, 134"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1016,
+    "office" : 42,
+    "name" : "Мокей Тимофеева",
+    "priority" : 1,
+    "time" : "08:51:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1015,
+    "office" : 56,
+    "name" : "Яков Антонова",
+    "priority" : 0,
+    "time" : "19:12:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1034,
+    "office" : 25,
+    "name" : "Герман Лобанов",
+    "priority" : 1,
+    "time" : "20:46:00",
+    "adres" : "ул. Красная, 105к2"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1068,
+    "office" : 49,
+    "name" : "Давыд Гришина",
+    "priority" : 1,
+    "time" : "08:31:00",
+    "adres" : "ул. Димитрова, 177к2"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1071,
+    "office" : 72,
+    "name" : "Ипатий Симонова",
+    "priority" : 1,
+    "time" : "12:31:00",
+    "adres" : "ул. Институтская, 110к1"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1035,
+    "office" : 38,
+    "name" : "Амос Николаев",
+    "priority" : 0,
+    "time" : "19:12:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1076,
+    "office" : 12,
+    "name" : "Анастасия Федотова",
+    "priority" : 1,
+    "time" : "10:18:00",
+    "adres" : "ул. Лескова, 224А"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1038,
+    "office" : 84,
+    "name" : "Ульяна Нестерова",
+    "priority" : 1,
+    "time" : "12:44:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1000,
+    "office" : 87,
+    "name" : "Прасковья Никифорова",
+    "priority" : 1,
+    "time" : "20:24:00",
+    "adres" : "ул. Заречная, 65"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1082,
+    "office" : 72,
+    "name" : "Олимпий Кузнецов",
+    "priority" : 1,
+    "time" : "20:07:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1084,
+    "office" : 82,
+    "name" : "Нинель Трофимова",
+    "priority" : 2,
+    "time" : "12:42:00",
+    "adres" : "ул. Кошурникова, 214"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1039,
+    "office" : 75,
+    "name" : "Емельян Осипова",
+    "priority" : 1,
+    "time" : "18:29:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1088,
+    "office" : 24,
+    "name" : "Ананий Гущина",
+    "priority" : 2,
+    "time" : "17:37:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1089,
+    "office" : 50,
+    "name" : "Аскольд Якушев",
+    "priority" : 2,
+    "time" : "14:11:00",
+    "adres" : "ул. Солнечная, 240В"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1046,
+    "office" : 20,
+    "name" : "Леонид Антонова",
+    "priority" : 1,
+    "time" : "08:56:00",
+    "adres" : "Карла Маркса проспект, 3к1"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1091,
+    "office" : 84,
+    "name" : "Алексей Исаева",
+    "priority" : 0,
+    "time" : "19:11:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1096,
+    "office" : 74,
+    "name" : "Таисия Герасимова",
+    "priority" : 2,
+    "time" : "13:01:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1047,
+    "office" : 11,
+    "name" : "Аполлинарий Григорьев",
+    "priority" : 1,
+    "time" : "21:55:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1005,
+    "office" : 69,
+    "name" : "Будимир Чернов",
+    "priority" : 2,
+    "time" : "21:18:00",
+    "adres" : "ул. Красноармейская, 181"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1048,
+    "office" : 14,
+    "name" : "Борислав Тихонов",
+    "priority" : 1,
+    "time" : "16:19:00",
+    "adres" : "бульвар Дружбы, 124А"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1051,
+    "office" : 37,
+    "name" : "Адам Третьяков",
+    "priority" : 3,
+    "time" : "09:52:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1012,
+    "office" : 85,
+    "name" : "Евграф Савин",
+    "priority" : 2,
+    "time" : "13:45:00",
+    "adres" : "ул. Садовая, 116"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1026,
+    "office" : 53,
+    "name" : "Никанор Смирнова",
+    "priority" : 3,
+    "time" : "10:46:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1054,
+    "office" : 93,
+    "name" : "Эдуард Павлова",
+    "priority" : 2,
+    "time" : "15:10:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1027,
+    "office" : 26,
+    "name" : "Влас Лазарева",
+    "priority" : 3,
+    "time" : "21:08:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1028,
+    "office" : 83,
+    "name" : "Панкрат Трофимова",
+    "priority" : 2,
+    "time" : "13:16:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1057,
+    "office" : 41,
+    "name" : "Епифан Коновалова",
+    "priority" : 3,
+    "time" : "11:34:00",
+    "adres" : "ул. Молодёжная, 208"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1002,
+    "office" : 58,
+    "name" : "Эмилия Котова",
+    "priority" : 2,
+    "time" : "17:53:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1013,
+    "office" : 7,
+    "name" : "Анжелика Рогов",
+    "priority" : 2,
+    "time" : "12:09:00",
+    "adres" : "Победы проспект, 67"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1014,
+    "office" : 21,
+    "name" : "Никифор Виноградов",
+    "priority" : 2,
+    "time" : "08:25:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1030,
+    "office" : 47,
+    "name" : "Василиса Васильев",
+    "priority" : 3,
+    "time" : "09:13:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1062,
+    "office" : 78,
+    "name" : "Арефий Турова",
+    "priority" : 3,
+    "time" : "18:29:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1003,
+    "office" : 93,
+    "name" : "Якуб Агафонов",
+    "priority" : 3,
+    "time" : "21:18:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1063,
+    "office" : 90,
+    "name" : "Борис Антонов",
+    "priority" : 3,
+    "time" : "10:40:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1065,
+    "office" : 3,
+    "name" : "Гордей Нестеров",
+    "priority" : 3,
+    "time" : "09:19:00",
+    "adres" : "пер. Первомайский, 185"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1032,
+    "office" : 61,
+    "name" : "Трофим Котова",
+    "priority" : 2,
+    "time" : "19:00:00",
+    "adres" : "ул. Гоголя, 184"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1033,
+    "office" : 31,
+    "name" : "Феликс Зуев",
+    "priority" : 3,
+    "time" : "21:17:00",
+    "adres" : "ул. Садовая, 232В"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1067,
+    "office" : 24,
+    "name" : "Борис Лазарев",
+    "priority" : 2,
+    "time" : "17:27:00",
+    "adres" : "Карла Маркса проспект, 246"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1007,
+    "office" : 43,
+    "name" : "Никанор Зимина",
+    "priority" : 1,
+    "time" : "21:57:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1070,
+    "office" : 57,
+    "name" : "Арсений Андреева",
+    "priority" : 3,
+    "time" : "21:11:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1008,
+    "office" : 84,
+    "name" : "Кондрат Федосеев",
+    "priority" : 2,
+    "time" : "21:23:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1072,
+    "office" : 8,
+    "name" : "Силантий Веселова",
+    "priority" : 3,
+    "time" : "12:57:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1017,
+    "office" : 18,
+    "name" : "Ратмир Ермаков",
+    "priority" : 2,
+    "time" : "20:46:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1073,
+    "office" : 39,
+    "name" : "Лука Бирюков",
+    "priority" : 0,
+    "time" : "19:37:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1018,
+    "office" : 13,
+    "name" : "Иванна Шубин",
+    "priority" : 3,
+    "time" : "12:36:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1075,
+    "office" : 61,
+    "name" : "Зинаида Веселов",
+    "priority" : 1,
+    "time" : "14:39:00"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1077,
+    "office" : 33,
+    "name" : "Святослав Соколов",
+    "priority" : 1,
+    "time" : "12:53:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1078,
+    "office" : 54,
+    "name" : "Артемий Евдокимова",
+    "priority" : 3,
+    "time" : "08:13:00",
+    "adres" : "ул. Автозаводская, 113"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1019,
+    "office" : 77,
+    "name" : "Ратмир Бурова",
+    "priority" : 3,
+    "time" : "16:46:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1079,
+    "office" : 18,
+    "name" : "Мартьян Устинова",
+    "priority" : 2,
+    "time" : "10:32:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1081,
+    "office" : 33,
+    "name" : "Аристарх Кузьмина",
+    "priority" : 3,
+    "time" : "12:37:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1020,
+    "office" : 40,
+    "name" : "Демид Пономарева",
+    "priority" : 2,
+    "time" : "20:04:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1001,
+    "office" : 86,
+    "name" : "Аггей Юдин",
+    "priority" : 3,
+    "time" : "11:30:00",
+    "adres" : "ул. Октябрьская, 182к2"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1083,
+    "office" : 26,
+    "name" : "Фирс Савельев",
+    "priority" : 2,
+    "time" : "14:00:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1041,
+    "office" : 27,
+    "name" : "Тит Морозов",
+    "priority" : 3,
+    "time" : "09:13:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1086,
+    "office" : 5,
+    "name" : "Майя Максимов",
+    "priority" : 1,
+    "time" : "21:38:00",
+    "adres" : "ул. Пушкина, 211В"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1043,
+    "office" : 84,
+    "name" : "Василий Крюков",
+    "priority" : 3,
+    "time" : "21:21:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1087,
+    "office" : 42,
+    "name" : "Венедикт Абрамова",
+    "priority" : 3,
+    "time" : "09:10:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1021,
+    "office" : 63,
+    "name" : "Евгений Гусев",
+    "priority" : 3,
+    "time" : "12:05:00",
+    "adres" : "бульвар Победы, 181к2"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1090,
+    "office" : 56,
+    "name" : "Родион Рыбаков",
+    "priority" : 3,
+    "time" : "13:06:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1009,
+    "office" : 84,
+    "name" : "Маргарита Лапин",
+    "priority" : 2,
+    "time" : "16:47:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1092,
+    "office" : 52,
+    "name" : "Лора Аксенов",
+    "priority" : 1,
+    "time" : "15:15:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1045,
+    "office" : 35,
+    "name" : "Лучезар Жданов",
+    "priority" : 2,
+    "time" : "13:10:00",
+    "adres" : "ул. Кленовая, 164к2"
+  }, {
+    "type" : "REGULAR",
+    "cardNumber" : 1093,
+    "office" : 39,
+    "name" : "Прасковья Лапина",
+    "priority" : 1,
+    "time" : "13:21:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1023,
+    "office" : 63,
+    "name" : "Милан Мельников",
+    "priority" : 3,
+    "time" : "16:14:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1095,
+    "office" : 23,
+    "name" : "Лучезар Ершов",
+    "priority" : 2,
+    "time" : "15:26:00"
+  }, {
+    "type" : "HOME",
+    "cardNumber" : 1097,
+    "office" : 50,
+    "name" : "Гордей Лукин",
+    "priority" : 3,
+    "time" : "21:18:00",
+    "adres" : "ул. Горная, 15"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1098,
+    "office" : 70,
+    "name" : "Аполлинарий Симонов",
+    "priority" : 3,
+    "time" : "12:39:00"
+  }, {
+    "type" : "CLOSED",
+    "cardNumber" : 1099,
+    "office" : 34,
+    "name" : "Кондрат Павлова",
+    "priority" : 3,
+    "time" : "19:16:00"
+  } ]
+}
