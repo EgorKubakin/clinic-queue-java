@@ -1,8 +1,9 @@
 package lab2.tickets;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 
-public class HomeTicket extends Ticket implements Editable {
+public class HomeTicket extends Ticket implements Editable, Serializable {
     private String adres;
 
     public String getAdres() {
@@ -17,4 +18,6 @@ public class HomeTicket extends Ticket implements Editable {
         super(cardNumber, office, name, priority, time);
         this.adres = adres;
     }
+
+    public HomeTicket(){}
 }

@@ -1,8 +1,21 @@
 package lab2.tickets;
 
-import java.time.LocalTime;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-public abstract class Ticket {
+import java.io.Serializable;
+import java.time.LocalTime;
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = RegularTicket.class, name = "REGULAR"),
+        @JsonSubTypes.Type(value = HomeTicket.class, name = "HOME"),
+        @JsonSubTypes.Type(value = CloseTicket.class, name = "CLOSED")
+})
+public abstract class Ticket implements Serializable {
     private int cardNumber;
     private int office;
     private String name;
@@ -16,7 +29,7 @@ public abstract class Ticket {
         setPriority(priority);
         setTime(time);
     }
-
+    public Ticket(){}
     public void setCardNumber(int cardNumber) {
         this.cardNumber = cardNumber;
     }
