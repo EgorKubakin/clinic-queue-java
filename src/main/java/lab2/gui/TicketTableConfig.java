@@ -18,6 +18,8 @@ public class TicketTableConfig {
         TableColumn<Ticket, Integer> office = new TableColumn<>("Office");
         TableColumn<Ticket, Integer> priority = new TableColumn<>("Priority");
         TableColumn<Ticket, LocalTime> time = new TableColumn<>("time");
+        TableColumn<Ticket, String> comment = new TableColumn<>("Comment");
+        TableColumn<Ticket, Boolean> confirmed = new TableColumn<>("Confirmed");
         colCard.setCellValueFactory((cellData) -> {
             Ticket val = cellData.getValue();
             return new ReadOnlyObjectWrapper<>(val.getCardNumber());
@@ -49,6 +51,14 @@ public class TicketTableConfig {
             }
             return new ReadOnlyStringWrapper("NONE");
         });
+        comment.setCellValueFactory((cellData) -> {
+            Ticket val = cellData.getValue();
+            return new ReadOnlyObjectWrapper<>(val.getComment());
+        });
+        confirmed.setCellValueFactory((cellData) -> {
+            Ticket val = cellData.getValue();
+            return new ReadOnlyObjectWrapper<>(val.isConfirmed());
+        });
         adres.setCellValueFactory(cellData -> {
             Ticket tk = cellData.getValue();
             if (tk instanceof HomeTicket) {
@@ -58,6 +68,6 @@ public class TicketTableConfig {
         });
         colName.setMinWidth(180);
         adres.setMinWidth(180);
-        table.getColumns().addAll(type, colCard, colName, office, priority, time, adres);
+        table.getColumns().addAll(type, colCard, colName, office, priority, time, adres,comment,confirmed);
     }
 }

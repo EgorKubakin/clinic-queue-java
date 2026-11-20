@@ -7,7 +7,7 @@ public class SerialException extends IOException {
 
     public enum SerialErrCode {
         EMPTY_FIELD("Required field is empty"),
-        INCORRECT_FIELD("Ticket contains invalid data"),
+        INCORRECT_FIELD("Tickets contains invalid data"),
         EMPTY_TICKET("File contains an empty ticket"),
         FILE_IO("Failed to read or write the file"),
         UNKNOW_CLASS("Unknown ticket type"),

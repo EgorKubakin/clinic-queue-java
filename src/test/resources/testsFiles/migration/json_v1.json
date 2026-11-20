@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "tickets": [
+    {
+      "type": "REGULAR",
+      "cardNumber": 120,
+      "office": 12,
+      "name": "Egor",
+      "priority": 0,
+      "time": "07:30:00"
+    },
+    {
+      "type": "HOME",
+      "cardNumber": 130,
+      "office": 1,
+      "name": "Ivan",
+      "priority": 1,
+      "time": "08:30:00",
+      "adres": "Green Street 33"
+    },
+    {
+      "type": "CLOSED",
+      "cardNumber": 200,
+      "office": 15,
+      "name": "Bob",
+      "priority": 2,
+      "time": "12:30:00"
+    }
+  ]
+}

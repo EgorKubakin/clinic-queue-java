@@ -7,7 +7,7 @@ public class TicketValidator {
         if(ticket==null){
             throw new SerialException("Ticket is null", SerialException.SerialErrCode.EMPTY_TICKET,ticketNumber);
         }
-        if(ticket.getTime()==null||ticket.getName()==null||ticket.getName().isBlank()){
+        if(ticket.getTime()==null||ticket.getName()==null||ticket.getName().isBlank()||ticket.getComment()==null){
             throw new SerialException("Ticket contain empty fields", SerialException.SerialErrCode.EMPTY_FIELD,ticketNumber);
         }
         if(ticket.getPriority()<0||ticket.getPriority()>3||ticket.getOffice()<0||ticket.getCardNumber()<=0){
