@@ -1,4 +1,7 @@
+
 package basicOperationtests;
+
+import lab2.exception.CsvException;
 import lab2.heap.BinHeap;
 import lab2.io.CsvLoadResult;
 import lab2.io.CsvLoader;
@@ -16,6 +19,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 public class BasicOperationTests {
     private Comparator<Ticket> comparator=(ticket1, ticket2) -> {
         int res = Integer.compare(ticket1.getPriority(), ticket2.getPriority());
@@ -24,13 +28,14 @@ public class BasicOperationTests {
         }
         return res;
     };
+
     @Test
     public void add4ElementInHeap(){
         BinHeap<Ticket> heap = new BinHeap<>(comparator);
-        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30));
-        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33");
-        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30));
-        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30));
+        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30),"",true);
+        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33","",true);
+        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30),"",true);
+        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30),"",true);
         heap.add(ticket1);
         heap.add(ticket2);
         heap.add(ticket3);
@@ -38,13 +43,14 @@ public class BasicOperationTests {
         assertEquals(4,heap.getSize());
         assertEquals(ticket4,heap.getMin());
     }
+
     @Test
     public void pop1ElementInHeap(){
         BinHeap<Ticket> heap = new BinHeap<>(comparator);
-        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30));
-        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33");
-        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30));
-        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30));
+        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30),"",true);
+        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33","",true);
+        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30),"",true);
+        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30),"",true);
         heap.add(ticket1);
         heap.add(ticket2);
         heap.add(ticket3);
@@ -53,20 +59,21 @@ public class BasicOperationTests {
         assertEquals(3,heap.getSize());
         assertEquals(ticket,ticket4);
     }
+
     @Test
-    public void CsvRound(@TempDir Path temp) throws IOException {
+    public void CsvRound(@TempDir Path temp) throws IOException, CsvException {
         BinHeap<Ticket> heap = new BinHeap<>(comparator);
-        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30));
-        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33");
-        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30));
-        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30));
+        Ticket ticket1 = new RegularTicket(120,12,"Egor",2, LocalTime.of(7,30),"",true);
+        Ticket ticket2 = new HomeTicket(130,1,"Ivan",1,LocalTime.of(8,30),"New Orleans 33","",true);
+        Ticket ticket3 = new CloseTicket(200,15,"Bob",3, LocalTime.of(12,30),"",true);
+        Ticket ticket4 = new RegularTicket(150,9,"Kate",0, LocalTime.of(9,30),"",true);
         heap.add(ticket1);
         heap.add(ticket2);
         heap.add(ticket3);
         heap.add(ticket4);
         Path path = temp.resolve("temp.csv");
         Path path1 = temp.resolve("testerrorlog.csv");
-        CsvSaver.save(heap,path);
+        CsvSaver.save(heap,path,3);
         CsvLoadResult res = CsvLoader.load(path,path1);
         BinHeap<Ticket> heap1= res.getTickets();
         int expectedSize = 4;

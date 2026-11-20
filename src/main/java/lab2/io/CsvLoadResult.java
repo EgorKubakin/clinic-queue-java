@@ -9,10 +9,16 @@ import java.util.List;
 public class CsvLoadResult {
     private BinHeap<Ticket> tickets;
     private int errorCount;
+    private int loadVersion;
 
-    public CsvLoadResult(BinHeap<Ticket> tickets, int errorCount) {
+    public int getLoadVersion() {
+        return loadVersion;
+    }
+
+    public CsvLoadResult(BinHeap<Ticket> tickets, int errorCount, int loadVersion) {
         this.tickets = tickets;
         this.errorCount = errorCount;
+        this.loadVersion = loadVersion;
     }
 
     public BinHeap<Ticket> getTickets() {

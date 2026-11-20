@@ -6,7 +6,9 @@ public class CsvException extends Exception {
         WRONG_FIELD_COUNT,
         BAD_NUMBER,
         EMPTY_FIELD,
-        INVALID_PRIORITY
+        INVALID_PRIORITY,
+        INVALID_CONFIRMED_VALUE,
+        UNSUPPORTED_VERSION
     }
 
     private final int lineNumber;

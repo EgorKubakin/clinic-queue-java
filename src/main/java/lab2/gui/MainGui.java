@@ -24,8 +24,9 @@ import lab2.heap.BinHeap;
 import lab2.io.CsvLoadResult;
 import lab2.io.CsvLoader;
 import lab2.io.CsvSaver;
-import lab2.io.serializable.BinSerializable;
-import lab2.io.serializable.JsonSerializer;
+import lab2.io.serializable.SchemaVersions;
+import lab2.io.serializable.binary.BinSerializable;
+import lab2.io.serializable.json.JsonSerializer;
 import lab2.io.serializable.Serializer;
 import lab2.tickets.*;
 import javafx.scene.control.ScrollPane;
@@ -37,6 +38,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import static lab2.io.serializable.SchemaVersions.CURRENT_VERSION;
+import static lab2.io.serializable.SchemaVersions.MIN_SUPPORTED_VERSION;
 
 public class MainGui extends Application {
     private BinHeap<Ticket> binHeap;
@@ -52,7 +55,7 @@ public class MainGui extends Application {
         }
         return res;
     };
-    private static final int SCHEMA_VERSION = 1;
+
     private static class TicketForm {
         final Dialog<ButtonType> dialog = new Dialog<>();
         final ComboBox<TicketType> comboType = new ComboBox<>();
@@ -62,6 +65,8 @@ public class MainGui extends Application {
         final ComboBox<Integer> priority = new ComboBox<>();
         final TextField time = new TextField();
         final TextField address = new TextField();
+        final TextField comment = new TextField();
+        final ComboBox<Boolean> confirmed = new ComboBox<>();
     }
 
     @Override
@@ -324,6 +329,7 @@ public class MainGui extends Application {
             return;
         }
         setMergeControls(true, loadcsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+        final int[] sourceVersion = new int[1];
         Task<BinHeap<Ticket>> mergeTask = new Task<>() {
             @Override
             protected BinHeap<Ticket> call() throws Exception {
@@ -339,6 +345,7 @@ public class MainGui extends Application {
                     throw new IllegalArgumentException("Second queue is null");
                 }
                 BinHeap<Ticket> result = binHeap.merge(secondHeap);
+                sourceVersion[0] = res.getLoadVersion();
                 updateProgress(1, 1);
                 return result;
             }
@@ -346,6 +353,15 @@ public class MainGui extends Application {
         progressBar.progressProperty().bind(mergeTask.progressProperty());
         percentProgress.textProperty().bind(mergeTask.progressProperty().multiply(100).asString("%.2f%%"));
         mergeTask.setOnSucceeded(event -> {
+            int version = sourceVersion[0];
+            if (version < SchemaVersions.CURRENT_VERSION) {
+                boolean accepted = confirmMigration("Migration confirmation", "File version: " + version + ". Migrate to version " + SchemaVersions.CURRENT_VERSION + "?\n\n" + "Missing fields will be filled with default values.");
+                if (!accepted) {
+                    setMergeControls(false, loadcsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                    unBind(progressBar, percentProgress, "Canceled", 1);
+                    return;
+                }
+            }
             unBind(progressBar, percentProgress, "100%", 1);
             binHeap = mergeTask.getValue();
             binHeap.clearTrace();
@@ -395,6 +411,8 @@ public class MainGui extends Application {
             form.office.setText(String.valueOf(selected.getOffice()));
             form.priority.getSelectionModel().select(selected.getPriority());
             form.time.setText(String.valueOf(selected.getTime()));
+            form.confirmed.getSelectionModel().select(selected.isConfirmed());
+            form.comment.setText(selected.getComment());
             if (selected instanceof HomeTicket home) {
                 form.comboType.getSelectionModel().select(TicketType.HOME);
                 form.address.setText(home.getAdres());
@@ -415,6 +433,8 @@ public class MainGui extends Application {
                 selected.setOffice(ticket.getOffice());
                 selected.setPriority(ticket.getPriority());
                 selected.setTime(ticket.getTime());
+                selected.setComment(ticket.getComment());
+                selected.setConfirmed(ticket.isConfirmed());
 
                 if (selected instanceof HomeTicket oldHome &&
                         ticket instanceof HomeTicket newHome) {
@@ -478,11 +498,6 @@ public class MainGui extends Application {
             alert.showAndWait();
         }
     }
-
-    private void setButtonDisable(Button generateButton, boolean one, Button cancel, boolean two) {
-        generateButton.setDisable(one);
-        cancel.setDisable(two);
-    }
     private void loadCsv(File file, ObservableList<Ticket> array, HeapVisualizer canvas, ProgressBar progressBar, Label percentProgress, Button cancel, Button loadCsv, Button generate, Button merge, Button add, Button editable, Button delete, Button nextTicket, Button changeP, TableView<Ticket> table){
         if (file != null) {
             setMergeControls(true, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
@@ -502,8 +517,22 @@ public class MainGui extends Application {
             percentProgress.textProperty().bind(load.progressProperty().multiply(100).asString("%.2f%%"));
             Thread thread = new Thread(load);
             load.setOnSucceeded(e -> {
-                unBind(progressBar, percentProgress, "100%", 1f);
                 CsvLoadResult res = load.getValue();
+                int sourceVersion=res.getLoadVersion();
+                if (sourceVersion < SchemaVersions.CURRENT_VERSION) {
+                    if (!confirmMigration("Migration confirmation", "This file uses version " + sourceVersion + ". Migrate to version " + SchemaVersions.CURRENT_VERSION + "?\n\n" + "Missing fields will be filled with default values. " + "The original file will not be changed.")) {
+                        unBind(progressBar, percentProgress, "canceled", 0f);
+                        setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                        return;
+                    }
+                }
+                unBind(progressBar, percentProgress, "100%", 1f);
+                if (res.getTickets().getSize() == 0 && res.getErrorCount() > 0) {
+                    Alert alert = errAlert("Warning",null,"The queue was not replaced because no valid lines were found; errors are recorded in the files");
+                    alert.show();
+                    setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                    return;
+                }
                 binHeap = res.getTickets();
                 refreshView(array, canvas);
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -552,7 +581,7 @@ public class MainGui extends Application {
                 @Override
                 protected BinHeap<Ticket> call() throws Exception {
 
-                    BinHeap<Ticket> res = serializer.load(file.toPath(),comparator,SCHEMA_VERSION);
+                    BinHeap<Ticket> res = serializer.load(file.toPath(),comparator);
                     return res;
                 }
             };
@@ -560,6 +589,14 @@ public class MainGui extends Application {
             percentProgress.setText("In processing..");
             Thread thread = new Thread(load);
             load.setOnSucceeded(e -> {
+                int sourceVersion=serializer.getLoadVersion();
+                if (sourceVersion < SchemaVersions.CURRENT_VERSION) {
+                    if (!confirmMigration("Migration confirmation", "This file uses version " + sourceVersion + ". Migrate to version " + SchemaVersions.CURRENT_VERSION + "?\n\n" + "Missing fields will be filled with default values. " + "The original file will not be changed.")) {
+                        progressBar.setProgress(0);
+                        setMergeControls(false, loadCsv, generate, merge, add, editable, delete, nextTicket, changeP, cancel, table);
+                        return;
+                    }
+                }
                 progressBar.setProgress(1);
                 percentProgress.setText("100%");
                 binHeap = load.getValue();
@@ -654,20 +691,42 @@ public class MainGui extends Application {
         comboBox.getItems().addAll("CSV","JSON","BIN");
         comboBox.getSelectionModel().selectFirst();
         Button buttonSave = new Button("Save");
+        TextField versionStr = new TextField();
+        versionStr.setPromptText("input format version");
+        VBox vBox = new VBox(20);
         HBox hBox = new HBox(20);
         hBox.getChildren().add(comboBox);
         hBox.getChildren().add(buttonSave);
-        dialog.getDialogPane().setContent(hBox);
+        vBox.getChildren().add(hBox);
+        vBox.getChildren().add(versionStr);
+        dialog.getDialogPane().setContent(vBox);
         ButtonType exitType = new ButtonType("Exit", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(exitType);
         buttonSave.setOnAction((event)->{
-            String format = comboBox.getValue().toLowerCase();
-            handleSaver(format,stage,edit,changeP,table,dialog,buttonSave);
+            try {
+                String version = versionStr.getText();
+                int schema_version = Integer.parseInt(version);
+                if(schema_version>CURRENT_VERSION||schema_version<MIN_SUPPORTED_VERSION){
+                    throw new NumberFormatException();
+                }
+                if (schema_version < SchemaVersions.CURRENT_VERSION) {
+                    if (!confirmMigration("Downgrade confirmation", "Save this file as version " + schema_version + "?\n\n" + "Some new fields will be lost in the saved file. " + "Your current data will not be changed.")) {
+                        return;
+                    }
+                }
+                String format = comboBox.getValue().toLowerCase();
+                handleSaver(format,stage,edit,changeP,table,dialog,buttonSave,schema_version);
+            } catch (NumberFormatException e) {
+                Alert alert = errAlert("Incorrect version",null,"UNSUPPORTED VERSION");
+                alert.showAndWait();
+
+
+            }
         });
         dialog.show();
     }
 
-    private void handleSaver(String format,Stage stage, Button edit, Button changeP, TableView<Ticket> table,Dialog<Void> dialog,Button saveButton) {
+    private void handleSaver(String format,Stage stage, Button edit, Button changeP, TableView<Ticket> table,Dialog<Void> dialog,Button saveButton,int version) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save "+format);
         fileChooser.setInitialFileName("tickets."+format);
@@ -687,14 +746,14 @@ public class MainGui extends Application {
                 @Override
                 protected Void call() throws Exception {
                     if (format.equals("csv")) {
-                        CsvSaver.save(snapshot, path);
+                        CsvSaver.save(snapshot, path,version);
                     }else {
                         Serializer serializer = switch (format){
                             case "json"->new JsonSerializer();
                             case "bin"-> new BinSerializable();
                             default -> throw new IllegalArgumentException("Incorrect value format");
                         };
-                        serializer.save(path,snapshot,SCHEMA_VERSION);
+                        serializer.save(path,snapshot,version);
                     }
                     return null;
                 }
@@ -827,7 +886,7 @@ public class MainGui extends Application {
     }
 
     private String getStringTicketInfo(Ticket ticket) {
-        String info = "\nType: " + ticket.getClass().getSimpleName() + "\nCard Number: " + ticket.getCardNumber() + "\nName: " + ticket.getName() + "\nOffice: " + ticket.getOffice() + "\nPriority: " + ticket.getPriority() + "\nTime: " + ticket.getTime().toString();
+        String info = "\nType: " + ticket.getClass().getSimpleName() + "\nCard Number: " + ticket.getCardNumber() + "\nName: " + ticket.getName() + "\nOffice: " + ticket.getOffice() + "\nPriority: " + ticket.getPriority() + "\nTime: " + ticket.getTime().toString()+"\nComment: "+ticket.getComment()+"\nConfirmed: "+ticket.isConfirmed();
         if (ticket instanceof HomeTicket homeTicket) {
             info += "\nAddress: " + homeTicket.getAdres();
         }
@@ -841,9 +900,11 @@ public class MainGui extends Application {
         grid.setHgap(15);
         grid.setVgap(20);
         form.comboType.getItems().addAll(TicketType.REGULAR, TicketType.HOME);
+        form.confirmed.getItems().addAll(false,true);
         form.comboType.getSelectionModel().selectFirst();
         form.priority.getItems().addAll(0, 1, 2, 3);
         form.priority.getSelectionModel().selectFirst();
+        form.confirmed.getSelectionModel().selectFirst();
         grid.add(form.comboType, 1, 0);
         grid.add(new Label("Type: "), 0, 0);
         grid.add(form.cardNum, 1, 1);
@@ -856,8 +917,12 @@ public class MainGui extends Application {
         grid.add(new Label("Priority: "), 0, 4);
         grid.add(new Label("Time: "), 0, 5);
         grid.add(form.time, 1, 5);
-        grid.add(form.address, 1, 6);
-        grid.add(new Label("Address: "), 0, 6);
+        grid.add(form.address, 1, 8);
+        grid.add(new Label("Comment:"),0,6);
+        grid.add(form.comment,1,6);
+        grid.add(new Label("Confirmed:"),0,7);
+        grid.add(form.confirmed,1,7);
+        grid.add(new Label("Address: "), 0, 8);
         form.dialog.getDialogPane().setContent(grid);
         form.dialog.setWidth(800);
         form.dialog.setHeight(600);
@@ -883,6 +948,11 @@ public class MainGui extends Application {
         int off = Integer.parseInt(form.office.getText());
         int priOrity = form.priority.getValue();
         LocalTime tme = LocalTime.parse(form.time.getText());
+        String comment = form.comment.getText();
+        boolean confirmed = form.confirmed.getValue();
+        if (comment.contains(";") || comment.contains("\n") || comment.contains("\r")) {
+            throw new IllegalArgumentException("Comment cannot contain semicolons or line breaks");
+        }
         if (addname.isBlank() || addname.contains(";")) {
             throw new IllegalArgumentException("Incorrect field name");
         }
@@ -890,13 +960,23 @@ public class MainGui extends Application {
             throw new IllegalArgumentException("Incorrect field value");
         }
         if (typed == TicketType.REGULAR) {
-            return new RegularTicket(cardNumber, off, addname, priOrity, tme);
+            return new RegularTicket(cardNumber, off, addname, priOrity, tme,comment,confirmed);
         } else {
             String adress = form.address.getText();
             if (adress.isBlank() || adress.contains(";")) {
                 throw new IllegalArgumentException("Incorrect field address");
             }
-            return new HomeTicket(cardNumber, off, addname, priOrity, tme, adress);
+            return new HomeTicket(cardNumber, off, addname, priOrity, tme, adress,comment,confirmed);
         }
+    }
+    private boolean confirmMigration(String title, String contentText) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(contentText);
+        ButtonType confirm = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(confirm, cancel);
+        return alert.showAndWait().orElse(cancel) == confirm;
     }
 }

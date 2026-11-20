@@ -2,8 +2,10 @@ package lab2.tickets;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lab2.io.serializable.binary.VersionedObjectInputStream;
+import lab2.io.serializable.binary.VersionedObjectOutputStream;
 
-import java.io.Serializable;
+import java.io.*;
 import java.time.LocalTime;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -21,14 +23,62 @@ public abstract class Ticket implements Serializable {
     private String name;
     private int priority;
     private LocalTime time;
+    private transient String comment="";
+    private transient boolean confirmed;
+    @Serial
+    private static final long serialVersionUID=3521485221538833199L;
 
-    protected Ticket(int cardNumber, int office, String name, int priority, LocalTime time) {
-        setCardNumber(cardNumber);
-        setOffice(office);
-        setName(name);
+    public Ticket(int cardNumber, int office, String name, int priority, LocalTime time, String comment, boolean confirmed) {
+        this.cardNumber = cardNumber;
+        this.office = office;
+        this.name = name;
         setPriority(priority);
-        setTime(time);
+        this.time = time;
+        this.comment = comment;
+        this.confirmed = confirmed;
     }
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        long version;
+        if(out instanceof VersionedObjectOutputStream ot){
+            version= ot.getTargetVersion();
+        }else {
+            throw new IOException("Incorrect stream");
+        }
+        if(version == 3){
+            out.writeObject(comment);
+            out.writeBoolean(confirmed);
+        }else if(version==2){
+            out.writeObject(comment);
+        }
+    }
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        long version;
+        if(in instanceof VersionedObjectInputStream ot){
+            version= ot.getTargetVersion();
+        }else {
+            throw new IOException("Incorrect stream");
+        }
+        comment = version >= 2 ? (String) in.readObject() : "None";
+        confirmed = version >= 3 && in.readBoolean();
+    }
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
     public Ticket(){}
     public void setCardNumber(int cardNumber) {
         this.cardNumber = cardNumber;

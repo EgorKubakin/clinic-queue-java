@@ -1,17 +1,32 @@
-package lab2.io.serializable;
+package lab2.io.serializable.binary;
 import lab2.exception.SerialException;
 import lab2.heap.BinHeap;
+import lab2.io.serializable.*;
 import lab2.tickets.Ticket;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.Comparator;
 
+import static lab2.io.serializable.SchemaVersions.CURRENT_VERSION;
+import static lab2.io.serializable.SchemaVersions.MIN_SUPPORTED_VERSION;
 public class BinSerializable implements Serializer {
+    private int loadVersion;
+
+    public int getLoadVersion() {
+        return loadVersion;
+    }
+
     @Override
-    public BinHeap<Ticket> load(Path path, Comparator<Ticket> comparator, long version) throws SerialException {
+    public BinHeap<Ticket> load(Path path, Comparator<Ticket> comparator) throws SerialException {
         SerialFileClass serialFileClass;
-        try(ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(path.toFile()))){
+        try(VersionedObjectInputStream objectInputStream = new VersionedObjectInputStream(new FileInputStream(path.toFile()))){
+            int version=objectInputStream.getTargetVersion();
+            if(version>CURRENT_VERSION||version<MIN_SUPPORTED_VERSION){
+                throw new SerialException("Illegal field", SerialException.SerialErrCode.UNSUPPORTED_VERSION);
+            }
+            loadVersion=version;
             serialFileClass= (SerialFileClass) objectInputStream.readObject();
+            serialFileClass.setSchema_version(version);
             if(serialFileClass==null){
                 throw new NullPointerException("Null object");
             }
@@ -21,12 +36,12 @@ public class BinSerializable implements Serializer {
             throw new SerialException(e.getMessage(), SerialException.SerialErrCode.CAST_CLASS,e);
         } catch (NullPointerException e){
             throw new SerialException(e.getMessage(), SerialException.SerialErrCode.EMPTY_FIELD,e);
+        }catch (SerialException e) {
+            throw e;
         } catch (IOException e) {
             throw new SerialException(e.getMessage(), SerialException.SerialErrCode.FILE_IO,e);
         }
-        if(serialFileClass.getVersion()!=version){
-            throw new SerialException("Incorrect version file", SerialException.SerialErrCode.UNSUPPORTED_VERSION);
-        }
+
         Ticket[] tickets = serialFileClass.getTickets();
         if(tickets==null){
             throw new SerialException("Don't find tickets", SerialException.SerialErrCode.EMPTY_TICKET);
@@ -39,14 +54,18 @@ public class BinSerializable implements Serializer {
         return heap;
     }
 
-    @Override
-    public void save(Path path, BinHeap<Ticket> heap, long version) throws SerialException {
+
+    public void save(Path path, BinHeap<Ticket> heap, int version) throws SerialException {
         if(heap==null){
             throw new SerialException("heap is null", SerialException.SerialErrCode.UNKNOW_CLASS);
         }
+        if(version>CURRENT_VERSION||version<MIN_SUPPORTED_VERSION){
+            throw new SerialException("Illegal field", SerialException.SerialErrCode.UNSUPPORTED_VERSION);
+        }
+
         SerialFileClass serial = new SerialFileClass(version,getArrTickets(heap));
-        try(ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(path.toFile()))){
-            objectOutputStream.writeObject(serial);
+        try (VersionedObjectOutputStream out = new VersionedObjectOutputStream(new FileOutputStream(path.toFile()), version)) {
+            out.writeObject(serial);
         }catch (IOException e) {
             throw new SerialException(e.getMessage(), SerialException.SerialErrCode.FILE_IO,e);
         }

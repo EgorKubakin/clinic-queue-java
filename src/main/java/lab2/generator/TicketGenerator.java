@@ -55,9 +55,10 @@ public class TicketGenerator {
         int minute = random.nextInt(0, 60);
         LocalTime time = LocalTime.of(hours, minute);
         int addressIndex = random.nextInt(0, address.length);
+        boolean confirmed = random.nextBoolean();
         TicketType type = TicketType.values()[random.nextInt(TicketType.values().length)];
         CsvTicketHandler handler = CsvTicketHandler.fromType(type);
-        return handler.create(cardNumber, office, names[nameIndex] + " " + surnames[surIndex], priority, time, address[addressIndex]);
+        return handler.create(cardNumber, office, names[nameIndex] + " " + surnames[surIndex], priority, time, address[addressIndex],"",confirmed);
     }
 
     public double getMs() {

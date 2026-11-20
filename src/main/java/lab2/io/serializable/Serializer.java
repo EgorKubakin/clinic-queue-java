@@ -8,7 +8,8 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 public interface Serializer {
-    BinHeap<Ticket> load(Path path, Comparator<Ticket> comparator,long version) throws SerialException;
-    void save(Path path, BinHeap<Ticket> heap,long version) throws SerialException;
+    BinHeap<Ticket> load(Path path, Comparator<Ticket> comparator) throws SerialException;
+    void save(Path path, BinHeap<Ticket> heap,int version) throws SerialException;
     String format();
+    int getLoadVersion();
 }
